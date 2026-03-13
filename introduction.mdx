@@ -1,0 +1,104 @@
+---
+title: Introduction
+description: Welcome to CRM API - A full-stack customer relationship management solution
+---
+
+<div className="bg-white border border-[#e0e0e0] rounded-lg shadow-sm p-8 mb-8">
+  <h1 className="text-5xl font-bold text-[#1a1a1a] mb-4">CRM API</h1>
+  <p className="text-lg text-[#1a1a1a] mb-6">
+    A full-stack CRM application built with Spring Boot and React.js to seamlessly manage users, accounts, contacts, and sales opportunities.
+  </p>
+  <div className="flex gap-4">
+    <a
+      href="/quickstart"
+      className="inline-block bg-[#94cb04] text-white font-bold px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
+    >
+      Get Started
+    </a>
+    <a
+      href="https://github.com/JuancaCalvino/CRM-API"
+      className="inline-block bg-[#e6e6e6] text-[#1a1a1a] font-bold px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
+    >
+      View on GitHub
+    </a>
+  </div>
+</div>
+
+## Overview
+
+CRM API is a comprehensive customer relationship management system designed for businesses to track and manage their sales pipeline effectively. Built with modern technologies, it provides a robust backend API powered by Spring Boot and an intuitive React-based frontend interface.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="User Authentication" icon="user-lock" href="/features/users-authentication">
+    Secure login and registration system with validation
+  </Card>
+  <Card title="Account Management" icon="building" href="/features/accounts">
+    Track companies and organizational records
+  </Card>
+  <Card title="Contact Management" icon="address-book" href="/features/contacts">
+    Manage people and representatives associated with accounts
+  </Card>
+  <Card title="Opportunity Pipeline" icon="chart-line" href="/features/opportunities">
+    Follow up on potential sales deals and business opportunities
+  </Card>
+</CardGroup>
+
+## Technology Stack
+
+### Backend
+- **Framework:** Spring Boot 3.0 (Java 17)
+- **Database:** H2 Database (In-Memory)
+- **Persistence:** Spring Data JPA / Hibernate
+- **Validation:** Hibernate Validator
+- **Testing:** TestNG
+
+### Frontend
+- **Library:** React.js (v18)
+- **Routing:** React Router DOM (v6)
+- **Validation:** Validator package
+- **Testing:** Jest & React Testing Library
+
+## Architecture
+
+The application follows a clean, modular architecture:
+
+- **Controllers:** RESTful endpoints for each resource (Users, Accounts, Contacts, Opportunities)
+- **Services:** Business logic layer handling operations and validations
+- **Repositories:** Data access layer using Spring Data JPA
+- **Models:** JPA entities representing the domain model
+
+## Quick Links
+
+<CardGroup cols={3}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get up and running in 5 minutes
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/overview">
+    Explore the complete API documentation
+  </Card>
+  <Card title="Deployment" icon="server" href="/deployment/backend">
+    Learn how to deploy your CRM system
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+CRM API is ideal for:
+
+- **Small Businesses:** Track customer relationships and sales opportunities
+- **Sales Teams:** Manage leads and monitor the sales pipeline
+- **Developers:** Learn full-stack development with Spring Boot and React
+- **Startups:** Quick deployment of a functional CRM system
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="GitHub Issues" icon="github" href="https://github.com/JuancaCalvino/CRM-API/issues">
+    Report bugs or request features
+  </Card>
+  <Card title="GitHub Repository" icon="code-branch" href="https://github.com/JuancaCalvino/CRM-API">
+    View source code and contribute
+  </Card>
+</CardGroup>

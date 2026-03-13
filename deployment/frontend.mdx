@@ -1,0 +1,314 @@
+---
+title: 'Frontend Deployment'
+description: 'Deploy and run the CRM React frontend application'
+---
+
+The CRM frontend is built with React 18.2.0 and uses Create React App for build tooling.
+
+## Prerequisites
+
+Before deploying the frontend, ensure you have:
+
+- **Node.js** 14.x or higher
+- **npm** 6.x or higher
+- Port **3000** available (default React development port)
+- Backend running on `http://localhost:8080`
+
+## Quick Start
+
+<Steps>
+  <Step title="Navigate to the frontend directory">
+    ```bash
+    cd frontend-react
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+
+    This will install all required packages from `package.json`
+  </Step>
+
+  <Step title="Start the development server">
+    ```bash
+    npm start
+    ```
+
+    The application will automatically open in your browser at `http://localhost:3000`
+  </Step>
+
+  <Step title="Verify the application is running">
+    The browser should open automatically. If not, navigate to:
+    ```
+    http://localhost:3000
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  The development server includes hot module replacement (HMR). Changes to source files will automatically reload in the browser.
+</Note>
+
+## Available Scripts
+
+The frontend includes several npm scripts defined in `package.json`:
+
+### Development Server
+
+Start the development server with hot reload:
+
+```bash
+npm start
+```
+
+- Opens browser automatically
+- Runs on `http://localhost:3000`
+- Live reload on file changes
+- Development optimizations enabled
+
+### Production Build
+
+Create an optimized production build:
+
+```bash
+npm run build
+```
+
+This command:
+- Bundles the app for production
+- Minifies JavaScript and CSS
+- Optimizes assets for best performance
+- Creates a `build/` directory with static files
+
+<CodeGroup>
+  ```bash Build output location
+  frontend-react/build/
+  ├── static/
+  │   ├── css/
+  │   ├── js/
+  │   └── media/
+  ├── index.html
+  └── ...
+  ```
+</CodeGroup>
+
+### Run Tests
+
+Run the test suite in interactive watch mode:
+
+```bash
+npm test
+```
+
+### Eject Configuration
+
+<Warning>
+  **This is a one-way operation. Once you eject, you can't go back!**
+</Warning>
+
+```bash
+npm run eject
+```
+
+Ejecting exposes all configuration files and dependencies, giving you full control over the build setup.
+
+## Port Configuration
+
+### Default Port
+
+The React development server runs on port **3000** by default.
+
+### Custom Port
+
+To run on a different port, set the `PORT` environment variable:
+
+<CodeGroup>
+  ```bash Linux/Mac
+  PORT=3001 npm start
+  ```
+
+  ```bash Windows (CMD)
+  set PORT=3001 && npm start
+  ```
+
+  ```bash Windows (PowerShell)
+  $env:PORT=3001; npm start
+  ```
+</CodeGroup>
+
+## Backend Connection
+
+The frontend is configured to connect to the backend at `http://localhost:8080`.
+
+### API Endpoints Used
+
+From the source code:
+
+```javascript
+// User login
+fetch("http://localhost:8080/api/user/searchUser", requestOptions)
+
+// User registration
+fetch("http://localhost:8080/api/user/createUser", requestOptions)
+```
+
+<Warning>
+  The backend API URL is hardcoded in the source files. If your backend runs on a different port or host, you'll need to update the URLs in the source code.
+</Warning>
+
+### Changing the Backend URL
+
+To connect to a different backend:
+
+1. Update API calls in `src/Routes/Home.js`
+2. Update API calls in `src/Routes/Register.js`
+3. Update any other files making API requests
+
+**Example change:**
+```javascript
+// Before
+fetch("http://localhost:8080/api/user/searchUser", requestOptions)
+
+// After (production)
+fetch("https://api.yourcrm.com/api/user/searchUser", requestOptions)
+```
+
+## Project Dependencies
+
+Key dependencies from `package.json`:
+
+<Accordion title="View all dependencies">
+  - **react** (18.2.0) - React library
+  - **react-dom** (18.2.0) - React DOM rendering
+  - **react-router-dom** (6.4.4) - Client-side routing
+  - **react-scripts** (5.0.1) - Create React App scripts
+  - **validator** (13.7.0) - Form validation utilities
+  - **@testing-library/react** (13.4.0) - Testing utilities
+  - **@testing-library/jest-dom** (5.16.5) - Jest matchers
+  - **@testing-library/user-event** (13.5.0) - User interaction simulation
+</Accordion>
+
+## Production Deployment
+
+### Build for Production
+
+<Steps>
+  <Step title="Create production build">
+    ```bash
+    npm run build
+    ```
+  </Step>
+
+  <Step title="Serve static files">
+    The `build/` folder contains static files that can be served by any web server.
+
+    <CodeGroup>
+      ```bash Using serve package
+      npx serve -s build -l 3000
+      ```
+
+      ```bash Using Python HTTP server
+      cd build
+      python -m http.server 3000
+      ```
+
+      ```nginx Nginx configuration
+      server {
+        listen 80;
+        server_name yourcrm.com;
+        root /path/to/frontend-react/build;
+        
+        location / {
+          try_files $uri $uri/ /index.html;
+        }
+      }
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Configure API endpoints">
+    Update all hardcoded API URLs to point to your production backend before building.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordion title="Port 3000 already in use">
+  If port 3000 is already in use:
+  
+  1. Find and kill the process:
+     ```bash
+     # Linux/Mac
+     lsof -i :3000
+     kill -9 <PID>
+     
+     # Windows
+     netstat -ano | findstr :3000
+     taskkill /PID <PID> /F
+     ```
+  
+  2. Or use a different port:
+     ```bash
+     PORT=3001 npm start
+     ```
+</Accordion>
+
+<Accordion title="npm install fails">
+  If dependency installation fails:
+  
+  1. Clear npm cache:
+     ```bash
+     npm cache clean --force
+     ```
+  
+  2. Delete `node_modules` and `package-lock.json`:
+     ```bash
+     rm -rf node_modules package-lock.json
+     npm install
+     ```
+  
+  3. Try using a different registry:
+     ```bash
+     npm install --registry=https://registry.npmjs.org/
+     ```
+</Accordion>
+
+<Accordion title="API requests fail with CORS errors">
+  If you see CORS errors in the browser console:
+  
+  1. Ensure the backend is running on `http://localhost:8080`
+  2. Verify that `@CrossOrigin()` annotations are present on backend controllers
+  3. Check that the backend URL in frontend code matches your backend address
+  
+  See the [Configuration guide](/deployment/configuration#cors-configuration) for more details.
+</Accordion>
+
+<Accordion title="Blank page after build">
+  If the production build shows a blank page:
+  
+  1. Check browser console for errors
+  2. Verify all API URLs are updated for production
+  3. Ensure the web server is configured to handle React Router:
+     - All routes should serve `index.html`
+     - Configure `try_files` or equivalent for your server
+</Accordion>
+
+<Note>
+  For optimal performance, the production build is minified and filenames include hashes for cache busting.
+</Note>
+
+## Browser Support
+
+The application is configured to support:
+
+**Production:**
+- Browsers with >0.2% market share
+- Not dead browsers
+- Not Opera Mini
+
+**Development:**
+- Last Chrome version
+- Last Firefox version
+- Last Safari version

@@ -1,80 +1,313 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quickstart'
+description: 'Get your CRM application up and running in minutes'
 ---
 
-## Get started in three steps
+Get your full-stack CRM application running locally in under 5 minutes. This guide will help you start both the Spring Boot backend and React frontend, then make your first API calls.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
+Before you begin, ensure you have the following installed:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Java 17 JDK" icon="mug-hot">
+    Required for running the Spring Boot backend
+  </Card>
+  <Card title="Node.js & npm" icon="node-js">
+    Required for running the React frontend
+  </Card>
 </CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  You can verify your installations with `java -version` and `node -v` commands.
 </Note>
+
+## Quick Start
+
+<Steps>
+  <Step title="Start the Backend Server">
+    Navigate to the backend directory and start the Spring Boot application:
+
+    ```bash
+    cd "Backend Springboot/CRM"
+    ./mvnw spring-boot:run
+    ```
+
+    The backend server will start on `http://localhost:8080`
+
+    <Tip>
+      On Windows, use `mvnw.cmd spring-boot:run` instead.
+    </Tip>
+  </Step>
+
+  <Step title="Start the Frontend Application">
+    Open a new terminal window, navigate to the frontend directory, and start the React development server:
+
+    ```bash
+    cd frontend-react
+    npm install
+    npm start
+    ```
+
+    The application will automatically open in your browser at `http://localhost:3000`
+
+    <Note>
+      You only need to run `npm install` the first time or when dependencies change.
+    </Note>
+  </Step>
+
+  <Step title="Verify the Application">
+    You should see the CRM login page in your browser. The application is now running with:
+    
+    - **Backend API**: `http://localhost:8080/api`
+    - **Frontend UI**: `http://localhost:3000`
+    - **H2 Console**: `http://localhost:8080/h2-console`
+  </Step>
+</Steps>
+
+## Making Your First API Calls
+
+Now that your backend is running, let's make some API calls to understand how the CRM works.
+
+### Create a User
+
+Register a new user in the system:
+
+<CodeGroup>
+```bash cURL
+curl -X POST http://localhost:8080/api/user/createUser \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "password123",
+    "phone": 1234567890,
+    "address": "123 Main St, City"
+  }'
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/user/createUser', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    password: 'password123',
+    phone: 1234567890,
+    address: '123 Main St, City'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = "http://localhost:8080/api/user/createUser"
+payload = {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "password123",
+    "phone": 1234567890,
+    "address": "123 Main St, City"
+}
+
+response = requests.post(url, json=payload)
+print(response.json())
+```
+</CodeGroup>
+
+<Note>
+  Password must be between 4 and 15 characters. Email must be unique and valid.
+</Note>
+
+### Login a User
+
+Authenticate an existing user:
+
+```bash
+curl -X POST http://localhost:8080/api/user/searchUser \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "password123"
+  }'
+```
+
+### Create an Opportunity
+
+Create a new sales opportunity:
+
+```bash
+curl -X POST http://localhost:8080/api/opportunity/createOpportunity \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Enterprise Deal Q1",
+    "description": "Large enterprise software deal",
+    "expectedRevenue": 50000,
+    "stage": "Prospecting"
+  }'
+```
+
+### Create an Account
+
+Add a new business account:
+
+```bash
+curl -X POST http://localhost:8080/api/account/createAccount \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Corporation",
+    "email": "contact@acme.com",
+    "phone": 5551234567,
+    "address": "456 Business Ave",
+    "isCustomer": true,
+    "isActiveCustomer": true
+  }'
+```
+
+## Available API Endpoints
+
+The CRM API provides the following endpoints:
+
+### User Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/user/createUser` | Register a new user |
+| `POST` | `/api/user/searchUser` | Login/authenticate user |
+| `GET` | `/api/user/getUsers` | Get all users |
+
+[View detailed User API documentation](/api/users)
+
+### Account Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/account/createAccount` | Create a new account |
+| `GET` | `/api/account/getAccounts` | Get all accounts |
+
+[View detailed Account API documentation](/api/accounts)
+
+### Contact Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/contact/createContact` | Create a new contact |
+| `GET` | `/api/contact/getContacts` | Get all contacts |
+| `PUT` | `/api/contact/updateContact` | Update an existing contact |
+
+[View detailed Contact API documentation](/api/contacts)
+
+### Opportunity Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/opportunity/createOpportunity` | Create a new opportunity |
+| `GET` | `/api/opportunity/getOpportunities` | Get all opportunities |
+| `PUT` | `/api/opportunity/updateOpportunity` | Update an opportunity |
+| `DELETE` | `/api/opportunity/deleteOpportunity` | Delete an opportunity |
+
+[View detailed Opportunity API documentation](/api/opportunities)
+
+## Accessing the H2 Database Console
+
+The application uses an in-memory H2 database that you can access via the web console:
+
+<Steps>
+  <Step title="Open the H2 Console">
+    Navigate to `http://localhost:8080/h2-console` in your browser
+  </Step>
+
+  <Step title="Configure Connection">
+    Use the following settings:
+    
+    - **JDBC URL**: `jdbc:h2:mem:testdb`
+    - **User Name**: `sa`
+    - **Password**: _(leave empty)_
+  </Step>
+
+  <Step title="Connect and Query">
+    Click **Connect** to access the database. You can now run SQL queries to view your data:
+    
+    ```sql
+    SELECT * FROM USERS;
+    SELECT * FROM ACCOUNT;
+    SELECT * FROM CONTACT;
+    SELECT * FROM OPPORTUNITY;
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  The H2 database is in-memory, so all data will be lost when you stop the server. This is ideal for development and testing.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Port 8080 is already in use">
+    If port 8080 is already occupied, you can change it by adding this to `application.properties`:
+    
+    ```properties
+    server.port=8081
+    ```
+    
+    Remember to update your frontend API calls accordingly.
+  </Accordion>
+
+  <Accordion title="CORS errors in browser">
+    The backend includes `@CrossOrigin()` annotations on all endpoints. If you still experience CORS issues, ensure:
+    
+    - Backend is running on port 8080
+    - Frontend is running on port 3000
+    - No browser extensions are blocking requests
+  </Accordion>
+
+  <Accordion title="Maven wrapper not executable">
+    On Unix-based systems, make the Maven wrapper executable:
+    
+    ```bash
+    chmod +x mvnw
+    ```
+  </Accordion>
+
+  <Accordion title="Database connection errors">
+    The application uses an in-memory H2 database with automatic configuration. If you see database errors:
+    
+    - Verify `application.properties` contains: `spring.datasource.url=jdbc:h2:mem:testdb`
+    - Check that no other application is using the H2 console port
+    - Restart the backend server to reset the database
+  </Accordion>
+
+  <Accordion title="Frontend not connecting to backend">
+    Ensure your React app is configured to use the correct backend URL. Check your API configuration in the frontend code points to `http://localhost:8080/api`
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+Now that you have the application running, explore these topics:
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Detailed installation and configuration instructions
+  </Card>
+  <Card title="API Overview" icon="code" href="/api/overview">
+    Complete API reference and examples
+  </Card>
+  <Card title="User Authentication" icon="lock" href="/features/users-authentication">
+    Learn about user registration and login
+  </Card>
+  <Card title="Configuration" icon="gear" href="/deployment/configuration">
+    Configure your application for different environments
+  </Card>
+</CardGroup>
+
+<Tip>
+  Try using the UI at `http://localhost:3000` to register a user, login, and explore the CRM features through the graphical interface!
+</Tip>

@@ -1,0 +1,128 @@
+---
+title: 'API Overview'
+description: 'Complete reference for the CRM REST API'
+icon: 'code'
+---
+
+## Introduction
+
+The CRM API is a RESTful service built with Spring Boot that provides endpoints for managing users, accounts, contacts, and opportunities in a customer relationship management system.
+
+## Base URL
+
+All API endpoints are relative to the base URL:
+
+```
+http://localhost:8080
+```
+
+## API Structure
+
+The API is organized into four main resource groups:
+
+- **Users** (`/api/user`) - User authentication and management
+- **Accounts** (`/api/account`) - Customer account management
+- **Contacts** (`/api/contact`) - Contact interaction tracking
+- **Opportunities** (`/api/opportunity`) - Sales opportunity management
+
+## Request Format
+
+All requests should be sent with the following headers:
+
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+Request bodies should be formatted as JSON.
+
+## Response Format
+
+All responses are returned in JSON format. The API uses standard HTTP response codes:
+
+### Success Codes
+
+- `200 OK` - Request succeeded
+- `201 Created` - Resource created successfully
+
+### Error Codes
+
+- `404 Not Found` - Resource not found or operation failed
+- `400 Bad Request` - Validation error (when @Valid constraints are violated)
+
+## CORS Configuration
+
+All endpoints have `@CrossOrigin()` enabled, allowing cross-origin requests from any domain.
+
+## Data Validation
+
+The API uses Jakarta Bean Validation (`@Valid`) annotations to ensure data integrity:
+
+- Email fields must be valid email addresses
+- Password must be between 4-15 characters
+- Required fields are enforced at the database level
+
+## Database
+
+The API uses an H2 in-memory database with automatic schema creation:
+
+```
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.jpa.hibernate.ddl-auto=create-drop
+```
+
+<Warning>
+  The database is reset on application restart. All data is lost when the server stops.
+</Warning>
+
+## Data Relationships
+
+The CRM system has the following entity relationships:
+
+- **User** has many **Opportunities** (one-to-many)
+- **Opportunity** has many **Accounts** (one-to-many)
+- **Opportunity** has many **Contacts** (one-to-many)
+- **Account** has many **Contacts** (one-to-many)
+- **Account** belongs to one **Opportunity** (many-to-one)
+- **Contact** belongs to one **Account** and one **Opportunity** (many-to-one)
+
+## Quick Start
+
+Here's a simple example to create a user and retrieve all users:
+
+```bash
+# Create a user
+curl -X POST http://localhost:8080/api/user/createUser \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "password123",
+    "phone": 1234567890,
+    "address": "123 Main St"
+  }'
+
+# Get all users
+curl http://localhost:8080/api/user/getUsers
+```
+
+## Authentication
+
+The API provides a login endpoint (`/api/user/searchUser`) that validates user credentials. However, there is no token-based authentication system implemented - all endpoints are publicly accessible.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Users API" icon="user" href="/api/users">
+    User registration, login, and management
+  </Card>
+  <Card title="Accounts API" icon="building" href="/api/accounts">
+    Customer account creation and retrieval
+  </Card>
+  <Card title="Contacts API" icon="address-book" href="/api/contacts">
+    Contact interaction tracking
+  </Card>
+  <Card title="Opportunities API" icon="bullseye" href="/api/opportunities">
+    Sales opportunity management
+  </Card>
+</CardGroup>

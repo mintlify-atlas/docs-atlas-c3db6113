@@ -1,0 +1,425 @@
+---
+title: 'Users API'
+description: 'User registration, authentication, and management endpoints'
+icon: 'user'
+---
+
+## Overview
+
+The Users API provides endpoints for user registration, authentication, and retrieval. All endpoints are prefixed with `/api/user`.
+
+**Base Path:** `/api/user`
+
+**Source:** `UserController.java:22`
+
+---
+
+## POST /api/user/createUser
+
+Registers a new user in the system with validation.
+
+**Endpoint:** `POST http://localhost:8080/api/user/createUser`
+
+**Source:** `UserController.java:29`
+
+### Request Body
+
+<ParamField path="name" type="string">
+  User's full name
+</ParamField>
+
+<ParamField path="email" type="string" required>
+  User's email address. Must be a valid email format and unique in the system.
+  
+  **Validations:**
+  - Must match pattern: `.+@.+\..+`
+  - Must be valid email format
+  - Must be unique (enforced at database level)
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  User's password for authentication.
+  
+  **Validations:**
+  - Minimum length: 4 characters
+  - Maximum length: 15 characters
+</ParamField>
+
+<ParamField path="phone" type="integer">
+  User's phone number (stored as integer)
+</ParamField>
+
+<ParamField path="address" type="string">
+  User's physical address
+</ParamField>
+
+### Response
+
+<ResponseField name="userId" type="integer">
+  Auto-generated unique identifier for the user
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  User's full name
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  User's email address
+</ResponseField>
+
+<ResponseField name="password" type="string">
+  User's password (returned in response)
+</ResponseField>
+
+<ResponseField name="phone" type="integer">
+  User's phone number
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  User's address
+</ResponseField>
+
+<ResponseField name="opportunities" type="array">
+  List of opportunities associated with this user (lazy-loaded)
+</ResponseField>
+
+### Status Codes
+
+- `201 Created` - User successfully created
+- `404 Not Found` - User creation failed
+- `400 Bad Request` - Validation failed (invalid email or password length)
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST http://localhost:8080/api/user/createUser \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "securePass123",
+    "phone": 1234567890,
+    "address": "123 Main Street, New York, NY"
+  }'
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/user/createUser', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    password: 'securePass123',
+    phone: 1234567890,
+    address: '123 Main Street, New York, NY'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/user/createUser'
+data = {
+    'name': 'John Doe',
+    'email': 'john.doe@example.com',
+    'password': 'securePass123',
+    'phone': 1234567890,
+    'address': '123 Main Street, New York, NY'
+}
+
+response = requests.post(url, json=data)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "userId": 1,
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePass123",
+  "phone": 1234567890,
+  "address": "123 Main Street, New York, NY",
+  "opportunities": []
+}
+```
+
+---
+
+## POST /api/user/searchUser
+
+Authenticates a user by validating email and password credentials.
+
+**Endpoint:** `POST http://localhost:8080/api/user/searchUser`
+
+**Source:** `UserController.java:43`
+
+### Request Body
+
+<ParamField path="email" type="string" required>
+  User's email address to authenticate
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  User's password to authenticate
+</ParamField>
+
+<Info>
+  Only email and password fields are required for login. Other fields are ignored.
+</Info>
+
+### Response
+
+Returns the complete user object if credentials match.
+
+<ResponseField name="userId" type="integer">
+  User's unique identifier
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  User's full name
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  User's email address
+</ResponseField>
+
+<ResponseField name="password" type="string">
+  User's password
+</ResponseField>
+
+<ResponseField name="phone" type="integer">
+  User's phone number
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  User's address
+</ResponseField>
+
+### Status Codes
+
+- `200 OK` - User found and credentials match
+- `404 Not Found` - Email or password incorrect
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST http://localhost:8080/api/user/searchUser \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "securePass123"
+  }'
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/user/searchUser', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'john.doe@example.com',
+    password: 'securePass123'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/user/searchUser'
+data = {
+    'email': 'john.doe@example.com',
+    'password': 'securePass123'
+}
+
+response = requests.post(url, json=data)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "userId": 1,
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePass123",
+  "phone": 1234567890,
+  "address": "123 Main Street, New York, NY",
+  "opportunities": []
+}
+```
+
+---
+
+## GET /api/user/getUsers
+
+Retrieves all registered users from the system.
+
+**Endpoint:** `GET http://localhost:8080/api/user/getUsers`
+
+**Source:** `UserController.java:56`
+
+### Response
+
+Returns an array of all user objects.
+
+<ResponseField name="users" type="array">
+  Array of user objects. Each user contains:
+  
+  <Expandable title="User Object Properties">
+    <ResponseField name="userId" type="integer">
+      User's unique identifier
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      User's full name
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      User's email address
+    </ResponseField>
+    
+    <ResponseField name="password" type="string">
+      User's password
+    </ResponseField>
+    
+    <ResponseField name="phone" type="integer">
+      User's phone number
+    </ResponseField>
+    
+    <ResponseField name="address" type="string">
+      User's address
+    </ResponseField>
+    
+    <ResponseField name="opportunities" type="array">
+      List of associated opportunities (lazy-loaded)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Status Codes
+
+- `200 OK` - Users retrieved successfully
+- `404 Not Found` - No users found in system
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl http://localhost:8080/api/user/getUsers
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/user/getUsers')
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/user/getUsers'
+response = requests.get(url)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+[
+  {
+    "userId": 1,
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "securePass123",
+    "phone": 1234567890,
+    "address": "123 Main Street, New York, NY",
+    "opportunities": []
+  },
+  {
+    "userId": 2,
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "password": "pass1234",
+    "phone": 9876543210,
+    "address": "456 Oak Avenue, Los Angeles, CA",
+    "opportunities": []
+  }
+]
+```
+
+---
+
+## Data Model
+
+### User Entity
+
+**Table:** `Users`
+
+**Source:** `User.java:19`
+
+<ParamField path="userId" type="Integer">
+  Primary key, auto-generated
+  
+  **Annotation:** `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)`
+</ParamField>
+
+<ParamField path="name" type="String">
+  User's full name
+</ParamField>
+
+<ParamField path="phone" type="Integer">
+  User's phone number
+</ParamField>
+
+<ParamField path="email" type="String">
+  User's email - must be valid and unique
+  
+  **Validations:**
+  - `@Email(message="Please provide a valid email address")`
+  - `@Pattern(regexp=".+@.+\\..+")`
+  - `@Column(unique=true)`
+</ParamField>
+
+<ParamField path="address" type="String">
+  User's physical address
+</ParamField>
+
+<ParamField path="password" type="String">
+  User's password
+  
+  **Validation:** `@Size(min = 4, max = 15)`
+</ParamField>
+
+<ParamField path="opportunities" type="List<Opportunity>">
+  One-to-many relationship with opportunities
+  
+  **Annotation:** `@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)`
+</ParamField>
+
+<Warning>
+  Passwords are stored and returned in plain text. This is not secure for production use.
+</Warning>

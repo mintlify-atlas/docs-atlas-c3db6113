@@ -1,0 +1,371 @@
+---
+title: 'Accounts API'
+description: 'Customer account management endpoints'
+icon: 'building'
+---
+
+## Overview
+
+The Accounts API manages customer account information including contact details, customer status, and relationships with opportunities. All endpoints are prefixed with `/api/account`.
+
+**Base Path:** `/api/account`
+
+**Source:** `AccountController.java:22`
+
+---
+
+## POST /api/account/createAccount
+
+Creates a new customer account in the system with validation.
+
+**Endpoint:** `POST http://localhost:8080/api/account/createAccount`
+
+**Source:** `AccountController.java:29`
+
+### Request Body
+
+<ParamField path="name" type="string" required>
+  Account name or company name
+</ParamField>
+
+<ParamField path="email" type="string" required>
+  Account's primary email address
+</ParamField>
+
+<ParamField path="address" type="string">
+  Physical address of the account
+</ParamField>
+
+<ParamField path="phone" type="long" required>
+  Account's phone number (stored as long integer)
+</ParamField>
+
+<ParamField path="isCustomer" type="boolean">
+  Indicates if this account is currently a customer
+</ParamField>
+
+<ParamField path="isActiveCustomer" type="boolean">
+  Indicates if this customer is currently active
+</ParamField>
+
+<ParamField path="opportunity" type="object" required>
+  The opportunity this account is associated with. Must include opportunity reference.
+  
+  <Expandable title="Opportunity Reference">
+    <ParamField path="opportunity.opportunityID" type="integer" required>
+      ID of the existing opportunity to link this account to
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<Warning>
+  An account must be associated with an existing opportunity. The `opportunity_id` field is required and cannot be null.
+</Warning>
+
+### Response
+
+<ResponseField name="accountID" type="integer">
+  Auto-generated unique identifier for the account
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Account name
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Account email address
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  Account physical address
+</ResponseField>
+
+<ResponseField name="phone" type="long">
+  Account phone number
+</ResponseField>
+
+<ResponseField name="isCustomer" type="boolean">
+  Customer status flag
+</ResponseField>
+
+<ResponseField name="isActiveCustomer" type="boolean">
+  Active customer status flag
+</ResponseField>
+
+<ResponseField name="contacts" type="array">
+  List of contacts associated with this account (lazy-loaded)
+</ResponseField>
+
+### Status Codes
+
+- `201 Created` - Account successfully created
+- `404 Not Found` - Account creation failed
+- `400 Bad Request` - Validation failed or invalid opportunity reference
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST http://localhost:8080/api/account/createAccount \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Corporation",
+    "email": "contact@acme.com",
+    "address": "789 Business Park, San Francisco, CA",
+    "phone": 4155551234,
+    "isCustomer": true,
+    "isActiveCustomer": true,
+    "opportunity": {
+      "opportunityID": 1
+    }
+  }'
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/account/createAccount', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Acme Corporation',
+    email: 'contact@acme.com',
+    address: '789 Business Park, San Francisco, CA',
+    phone: 4155551234,
+    isCustomer: true,
+    isActiveCustomer: true,
+    opportunity: {
+      opportunityID: 1
+    }
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/account/createAccount'
+data = {
+    'name': 'Acme Corporation',
+    'email': 'contact@acme.com',
+    'address': '789 Business Park, San Francisco, CA',
+    'phone': 4155551234,
+    'isCustomer': True,
+    'isActiveCustomer': True,
+    'opportunity': {
+        'opportunityID': 1
+    }
+}
+
+response = requests.post(url, json=data)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "accountID": 1,
+  "name": "Acme Corporation",
+  "email": "contact@acme.com",
+  "address": "789 Business Park, San Francisco, CA",
+  "phone": 4155551234,
+  "isCustomer": true,
+  "isActiveCustomer": true,
+  "contacts": []
+}
+```
+
+---
+
+## GET /api/account/getAccounts
+
+Retrieves all customer accounts from the system.
+
+**Endpoint:** `GET http://localhost:8080/api/account/getAccounts`
+
+**Source:** `AccountController.java:42`
+
+### Response
+
+Returns an array of all account objects.
+
+<ResponseField name="accounts" type="array">
+  Array of account objects. Each account contains:
+  
+  <Expandable title="Account Object Properties">
+    <ResponseField name="accountID" type="integer">
+      Account's unique identifier
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Account name
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      Account email address
+    </ResponseField>
+    
+    <ResponseField name="address" type="string">
+      Account physical address
+    </ResponseField>
+    
+    <ResponseField name="phone" type="long">
+      Account phone number
+    </ResponseField>
+    
+    <ResponseField name="isCustomer" type="boolean">
+      Customer status flag
+    </ResponseField>
+    
+    <ResponseField name="isActiveCustomer" type="boolean">
+      Active customer status flag
+    </ResponseField>
+    
+    <ResponseField name="contacts" type="array">
+      List of associated contacts (lazy-loaded)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Status Codes
+
+- `200 OK` - Accounts retrieved successfully
+- `404 Not Found` - No accounts found in system
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl http://localhost:8080/api/account/getAccounts
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/account/getAccounts')
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/account/getAccounts'
+response = requests.get(url)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+[
+  {
+    "accountID": 1,
+    "name": "Acme Corporation",
+    "email": "contact@acme.com",
+    "address": "789 Business Park, San Francisco, CA",
+    "phone": 4155551234,
+    "isCustomer": true,
+    "isActiveCustomer": true,
+    "contacts": []
+  },
+  {
+    "accountID": 2,
+    "name": "TechStart Inc",
+    "email": "hello@techstart.com",
+    "address": "101 Startup Lane, Austin, TX",
+    "phone": 5125559876,
+    "isCustomer": false,
+    "isActiveCustomer": false,
+    "contacts": []
+  }
+]
+```
+
+---
+
+## Data Model
+
+### Account Entity
+
+**Table:** `Account`
+
+**Source:** `Account.java:20`
+
+<ParamField path="accountID" type="Integer">
+  Primary key, auto-generated
+  
+  **Annotation:** `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)`
+  
+  **Source:** `Account.java:24`
+</ParamField>
+
+<ParamField path="name" type="String">
+  Account or company name
+  
+  **Source:** `Account.java:26`
+</ParamField>
+
+<ParamField path="email" type="String">
+  Primary email address for the account
+  
+  **Source:** `Account.java:28`
+</ParamField>
+
+<ParamField path="address" type="String">
+  Physical business address
+  
+  **Source:** `Account.java:30`
+</ParamField>
+
+<ParamField path="phone" type="long">
+  Primary contact phone number
+  
+  **Source:** `Account.java:32`
+</ParamField>
+
+<ParamField path="isCustomer" type="Boolean">
+  Flag indicating if account is a customer
+  
+  **Source:** `Account.java:34`
+</ParamField>
+
+<ParamField path="isActiveCustomer" type="Boolean">
+  Flag indicating if customer is currently active
+  
+  **Source:** `Account.java:36`
+</ParamField>
+
+<ParamField path="opportunity" type="Opportunity">
+  Many-to-one relationship with opportunity (required)
+  
+  **Annotation:** `@ManyToOne(fetch = FetchType.LAZY, optional = false)`
+  
+  **Foreign Key:** `opportunity_id` (not nullable)
+  
+  **Source:** `Account.java:38-40`
+</ParamField>
+
+<ParamField path="contacts" type="List<Contact>">
+  One-to-many relationship with contacts
+  
+  **Annotation:** `@OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)`
+  
+  **Source:** `Account.java:42-43`
+</ParamField>
+
+### Relationships
+
+<Info>
+  **Account Relationships:**
+  - Each account **must** belong to one opportunity (required, not nullable)
+  - Each account can have multiple contacts
+  - Deleting an account will cascade delete all associated contacts
+</Info>

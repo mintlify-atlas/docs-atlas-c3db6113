@@ -1,0 +1,420 @@
+---
+title: 'Contacts API'
+description: 'Contact interaction tracking and management endpoints'
+icon: 'address-book'
+---
+
+## Overview
+
+The Contacts API manages customer contact interactions, tracking communication methods and dates. Contacts are linked to both accounts and opportunities. All endpoints are prefixed with `/api/contact`.
+
+**Base Path:** `/api/contact`
+
+**Source:** `ContactController.java:16`
+
+---
+
+## POST /api/contact/createContact
+
+Creates a new contact interaction record in the system with validation.
+
+**Endpoint:** `POST http://localhost:8080/api/contact/createContact`
+
+**Source:** `ContactController.java:24`
+
+### Request Body
+
+<ParamField path="method" type="string" required>
+  The method of contact/communication (e.g., "Email", "Phone Call", "Meeting", "Video Conference")
+</ParamField>
+
+<ParamField path="date" type="string" required>
+  The date of the contact interaction in SQL date format (YYYY-MM-DD)
+  
+  **Format:** ISO 8601 date format or SQL date string
+</ParamField>
+
+<ParamField path="account" type="object" required>
+  The account this contact is associated with. Must reference an existing account.
+  
+  <Expandable title="Account Reference">
+    <ParamField path="account.accountID" type="integer" required>
+      ID of the existing account to link this contact to
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="opportunity" type="object" required>
+  The opportunity this contact is associated with. Must reference an existing opportunity.
+  
+  <Expandable title="Opportunity Reference">
+    <ParamField path="opportunity.opportunityID" type="integer" required>
+      ID of the existing opportunity to link this contact to
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<Warning>
+  Both `account` and `opportunity` foreign key fields are required and cannot be null. You must provide valid references to existing records.
+</Warning>
+
+### Response
+
+<ResponseField name="contactID" type="integer">
+  Auto-generated unique identifier for the contact
+</ResponseField>
+
+<ResponseField name="method" type="string">
+  The communication method used
+</ResponseField>
+
+<ResponseField name="date" type="string">
+  The date of the contact interaction
+</ResponseField>
+
+### Status Codes
+
+- `201 Created` - Contact successfully created
+- `404 Not Found` - Contact creation failed
+- `400 Bad Request` - Validation failed or invalid account/opportunity reference
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST http://localhost:8080/api/contact/createContact \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "Phone Call",
+    "date": "2026-03-13",
+    "account": {
+      "accountID": 1
+    },
+    "opportunity": {
+      "opportunityID": 1
+    }
+  }'
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/contact/createContact', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    method: 'Phone Call',
+    date: '2026-03-13',
+    account: {
+      accountID: 1
+    },
+    opportunity: {
+      opportunityID: 1
+    }
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```python Python
+import requests
+from datetime import date
+
+url = 'http://localhost:8080/api/contact/createContact'
+data = {
+    'method': 'Phone Call',
+    'date': '2026-03-13',
+    'account': {
+        'accountID': 1
+    },
+    'opportunity': {
+        'opportunityID': 1
+    }
+}
+
+response = requests.post(url, json=data)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "contactID": 1,
+  "method": "Phone Call",
+  "date": "2026-03-13"
+}
+```
+
+---
+
+## GET /api/contact/getContacts
+
+Retrieves all contact interactions from the system.
+
+**Endpoint:** `GET http://localhost:8080/api/contact/getContacts`
+
+**Source:** `ContactController.java:37`
+
+### Response
+
+Returns an array of all contact objects.
+
+<ResponseField name="contacts" type="array">
+  Array of contact objects. Each contact contains:
+  
+  <Expandable title="Contact Object Properties">
+    <ResponseField name="contactID" type="integer">
+      Contact's unique identifier
+    </ResponseField>
+    
+    <ResponseField name="method" type="string">
+      Communication method used
+    </ResponseField>
+    
+    <ResponseField name="date" type="string">
+      Date of the contact interaction (SQL date format)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Status Codes
+
+- `200 OK` - Contacts retrieved successfully
+- `404 Not Found` - No contacts found in system
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl http://localhost:8080/api/contact/getContacts
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/contact/getContacts')
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/contact/getContacts'
+response = requests.get(url)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+[
+  {
+    "contactID": 1,
+    "method": "Phone Call",
+    "date": "2026-03-13"
+  },
+  {
+    "contactID": 2,
+    "method": "Email",
+    "date": "2026-03-12"
+  },
+  {
+    "contactID": 3,
+    "method": "Video Conference",
+    "date": "2026-03-10"
+  }
+]
+```
+
+---
+
+## PUT /api/contact/updateContact
+
+Updates an existing contact interaction.
+
+**Endpoint:** `PUT http://localhost:8080/api/contact/updateContact`
+
+**Source:** `ContactController.java:50`
+
+### Request Body
+
+<ParamField path="contactID" type="integer" required>
+  The ID of the contact to update
+</ParamField>
+
+<ParamField path="method" type="string">
+  Updated communication method
+</ParamField>
+
+<ParamField path="date" type="string">
+  Updated date of the contact interaction (YYYY-MM-DD)
+</ParamField>
+
+<ParamField path="account" type="object">
+  Updated account reference
+  
+  <Expandable title="Account Reference">
+    <ParamField path="account.accountID" type="integer">
+      ID of the account
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="opportunity" type="object">
+  Updated opportunity reference
+  
+  <Expandable title="Opportunity Reference">
+    <ParamField path="opportunity.opportunityID" type="integer">
+      ID of the opportunity
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<Info>
+  You can update any combination of fields. Only include the fields you want to change along with the `contactID`.
+</Info>
+
+### Response
+
+<ResponseField name="result" type="boolean">
+  - `true` - Contact updated successfully
+  - `false` - Contact update failed
+</ResponseField>
+
+### Status Codes
+
+- `200 OK` - Contact updated successfully (returns `true`)
+- `404 Not Found` - Contact not found or update failed (returns `false`)
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X PUT http://localhost:8080/api/contact/updateContact \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contactID": 1,
+    "method": "In-Person Meeting",
+    "date": "2026-03-14"
+  }'
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/contact/updateContact', {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    contactID: 1,
+    method: 'In-Person Meeting',
+    date: '2026-03-14'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/contact/updateContact'
+data = {
+    'contactID': 1,
+    'method': 'In-Person Meeting',
+    'date': '2026-03-14'
+}
+
+response = requests.put(url, json=data)
+print(response.json())
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+true
+```
+
+---
+
+## Data Model
+
+### Contact Entity
+
+**Table:** `Contact`
+
+**Source:** `Contact.java:16`
+
+<ParamField path="contactID" type="Integer">
+  Primary key, auto-generated
+  
+  **Annotation:** `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)`
+  
+  **Source:** `Contact.java:20`
+</ParamField>
+
+<ParamField path="method" type="String">
+  The communication method or type of contact
+  
+  **Examples:** "Phone Call", "Email", "Meeting", "Video Conference", "SMS"
+  
+  **Source:** `Contact.java:22`
+</ParamField>
+
+<ParamField path="date" type="java.sql.Date">
+  The date when the contact occurred
+  
+  **Type:** SQL Date (YYYY-MM-DD format)
+  
+  **Source:** `Contact.java:24`
+</ParamField>
+
+<ParamField path="account" type="Account">
+  Many-to-one relationship with account (required)
+  
+  **Annotation:** `@ManyToOne(fetch = FetchType.LAZY, optional = false)`
+  
+  **Foreign Key:** `Account_id` (not nullable)
+  
+  **Source:** `Contact.java:26-28`
+</ParamField>
+
+<ParamField path="opportunity" type="Opportunity">
+  Many-to-one relationship with opportunity (required)
+  
+  **Annotation:** `@ManyToOne(fetch = FetchType.LAZY, optional = false)`
+  
+  **Foreign Key:** `Opportunity_id` (not nullable)
+  
+  **Source:** `Contact.java:30-32`
+</ParamField>
+
+### Relationships
+
+<Info>
+  **Contact Relationships:**
+  - Each contact **must** belong to one account (required, not nullable)
+  - Each contact **must** belong to one opportunity (required, not nullable)
+  - Contacts are used to track interactions between accounts and opportunities
+  - When an account or opportunity is deleted, associated contacts are also deleted (cascade)
+</Info>
+
+### Use Cases
+
+The Contact entity is designed to track all interactions with customers:
+
+- **Sales Follow-ups:** Track phone calls and emails with prospects
+- **Meeting History:** Record in-person meetings and video conferences
+- **Communication Timeline:** Build a complete history of all touchpoints
+- **Opportunity Tracking:** Link interactions to specific sales opportunities
+- **Account Management:** Associate contacts with customer accounts

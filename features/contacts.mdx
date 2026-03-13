@@ -1,0 +1,466 @@
+---
+title: "Contacts"
+description: "Track communication history and interactions with accounts"
+icon: "comments"
+---
+
+## Overview
+
+Contacts represent individual communication events and interactions with accounts in the CRM system. They track the method of communication, date, and link interactions to both accounts and opportunities for comprehensive relationship management.
+
+## Data Model
+
+### Contact Entity
+
+```java
+@Entity
+@Table(name = "Contact")
+public class Contact {
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer contactID;
+    
+    private String method;
+    private java.sql.Date date;
+    
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "Account_id", nullable = false)
+    private Account account;
+    
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "Opportunity_id", nullable = false)
+    private Opportunity opportunity;
+}
+```
+
+### Field Specifications
+
+<CardGroup cols={2}>
+  <Card title="contactID" icon="hashtag">
+    **Type:** Integer (Auto-generated)
+    
+    Primary key, automatically generated using identity strategy
+  </Card>
+  
+  <Card title="method" icon="phone">
+    **Type:** String
+    
+    Communication method used (e.g., "Email", "Phone Call", "Meeting", "SMS")
+  </Card>
+  
+  <Card title="date" icon="calendar">
+    **Type:** java.sql.Date
+    
+    Date when the contact/interaction occurred
+  </Card>
+</CardGroup>
+
+## Relationships
+
+Contacts maintain dual relationships to track interactions comprehensively:
+
+<Tabs>
+  <Tab title="Account Relationship">
+    **Many-to-One (Required)**
+    
+    Each contact must be associated with an account.
+    
+    ```java
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "Account_id", nullable = false)
+    private Account account;
+    ```
+    
+    <Note>
+      This links the communication to a specific company or organization.
+    </Note>
+  </Tab>
+  
+  <Tab title="Opportunity Relationship">
+    **Many-to-One (Required)**
+    
+    Each contact must be associated with an opportunity.
+    
+    ```java
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "Opportunity_id", nullable = false)
+    private Opportunity opportunity;
+    ```
+    
+    <Note type="info">
+      This tracks which sales opportunity the interaction relates to, enabling analysis of communication patterns per deal.
+    </Note>
+  </Tab>
+</Tabs>
+
+## API Endpoints
+
+### Create Contact
+
+Log a new communication interaction.
+
+```java
+@PostMapping("/createContact")
+public ResponseEntity<Contact> createContact(@Valid @RequestBody Contact contact)
+```
+
+<Accordion title="Request Details">
+  **Endpoint:** `POST /api/contact/createContact`
+  
+  **Request Body:**
+  ```json
+  {
+    "method": "Phone Call",
+    "date": "2026-03-13",
+    "account": {
+      "accountID": 1
+    },
+    "opportunity": {
+      "opportunityID": 1
+    }
+  }
+  ```
+  
+  **Response:** Returns the created contact object with generated `contactID`
+  
+  **Status Codes:**
+  - `201 CREATED` - Contact successfully logged
+  - `404 NOT FOUND` - Creation failed
+  
+  <Note type="warning">
+    Both account and opportunity IDs are required. They must reference existing entities.
+  </Note>
+</Accordion>
+
+### Get All Contacts
+
+Retrieve all contact records in the system.
+
+```java
+@GetMapping("/getContacts")
+public ResponseEntity<List<Contact>> returnsContacts()
+```
+
+<Accordion title="Request Details">
+  **Endpoint:** `GET /api/contact/getContacts`
+  
+  **Response:** Returns array of all contact objects
+  ```json
+  [
+    {
+      "contactID": 1,
+      "method": "Phone Call",
+      "date": "2026-03-13"
+    },
+    {
+      "contactID": 2,
+      "method": "Email",
+      "date": "2026-03-14"
+    }
+  ]
+  ```
+  
+  **Status Codes:**
+  - `200 OK` - Contacts retrieved successfully
+  - `404 NOT FOUND` - No contacts found
+</Accordion>
+
+### Update Contact
+
+Modify an existing contact record.
+
+```java
+@PutMapping("/updateContact")
+public ResponseEntity<Boolean> updateContact(@RequestBody Contact contact)
+```
+
+<Accordion title="Request Details">
+  **Endpoint:** `PUT /api/contact/updateContact`
+  
+  **Request Body:**
+  ```json
+  {
+    "contactID": 1,
+    "method": "Video Call",
+    "date": "2026-03-13",
+    "account": {
+      "accountID": 1
+    },
+    "opportunity": {
+      "opportunityID": 1
+    }
+  }
+  ```
+  
+  **Response:** Returns boolean indicating success
+  ```json
+  true
+  ```
+  
+  **Status Codes:**
+  - `200 OK` - Contact updated successfully
+  - `404 NOT FOUND` - Contact not found or update failed
+</Accordion>
+
+## Service Layer
+
+The `ContactService` handles business logic:
+
+```java
+@Service
+public class ContactService {
+    @Autowired
+    ContactRepo contactRepository;
+
+    // Create new contact
+    public Contact saveContact(Contact contact) {
+        return contactRepository.save(contact);
+    }
+
+    // Retrieve all contacts
+    public List<Contact> retrieveContacts() {
+        return contactRepository.findAll();
+    }
+
+    // Update existing contact
+    public Boolean updateContact(Contact contact) {
+        try {
+            contactRepository.save(contact);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
+```
+
+## Communication Methods
+
+Common values for the `method` field:
+
+<CardGroup cols={3}>
+  <Card title="Phone Call" icon="phone">
+    Direct voice communication
+  </Card>
+  
+  <Card title="Email" icon="envelope">
+    Electronic mail correspondence
+  </Card>
+  
+  <Card title="Meeting" icon="users">
+    In-person or virtual meeting
+  </Card>
+  
+  <Card title="SMS" icon="message">
+    Text message communication
+  </Card>
+  
+  <Card title="Video Call" icon="video">
+    Video conference or call
+  </Card>
+  
+  <Card title="Social Media" icon="hashtag">
+    Social platform interaction
+  </Card>
+</CardGroup>
+
+<Note type="info">
+  The `method` field is flexible and can accommodate any communication type your organization uses.
+</Note>
+
+## Frontend Integration
+
+### Creating a Contact
+
+```javascript
+async function logContact(contactData) {
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      method: contactData.method,
+      date: contactData.date,
+      account: {
+        accountID: contactData.accountId
+      },
+      opportunity: {
+        opportunityID: contactData.opportunityId
+      }
+    }),
+  };
+
+  try {
+    const response = await fetch(
+      "http://localhost:8080/api/contact/createContact",
+      requestOptions
+    );
+    
+    if (response.ok) {
+      const contact = await response.json();
+      console.log("Contact logged:", contact);
+      return contact;
+    }
+  } catch (error) {
+    console.error("Error logging contact:", error);
+  }
+}
+```
+
+### Updating a Contact
+
+```javascript
+async function updateContact(contactData) {
+  const requestOptions = {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contactID: contactData.id,
+      method: contactData.method,
+      date: contactData.date,
+      account: {
+        accountID: contactData.accountId
+      },
+      opportunity: {
+        opportunityID: contactData.opportunityId
+      }
+    }),
+  };
+
+  try {
+    const response = await fetch(
+      "http://localhost:8080/api/contact/updateContact",
+      requestOptions
+    );
+    
+    if (response.ok) {
+      const success = await response.json();
+      console.log("Contact updated:", success);
+      return success;
+    }
+  } catch (error) {
+    console.error("Error updating contact:", error);
+  }
+}
+```
+
+## Use Cases
+
+<Tabs>
+  <Tab title="Activity Logging">
+    **Track All Interactions**
+    
+    Create a contact record every time your team communicates with an account:
+    
+    ```javascript
+    // After a phone call
+    logContact({
+      method: "Phone Call",
+      date: new Date().toISOString().split('T')[0],
+      accountId: currentAccount.id,
+      opportunityId: currentOpportunity.id
+    });
+    ```
+    
+    This builds a complete history of all touchpoints.
+  </Tab>
+  
+  <Tab title="Follow-up Tracking">
+    **Monitor Communication Cadence**
+    
+    Query contacts by date to identify accounts that need follow-up:
+    
+    ```javascript
+    // Get all contacts in last 30 days
+    const recentContacts = await getAllContacts();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const needsFollowup = recentContacts.filter(contact => 
+      new Date(contact.date) < thirtyDaysAgo
+    );
+    ```
+  </Tab>
+  
+  <Tab title="Pipeline Analysis">
+    **Measure Engagement**
+    
+    Analyze contact frequency per opportunity to understand which deals are most active:
+    
+    ```javascript
+    // Group contacts by opportunity
+    const contactsByOpportunity = contacts.reduce((acc, contact) => {
+      const oppId = contact.opportunity.opportunityID;
+      acc[oppId] = (acc[oppId] || 0) + 1;
+      return acc;
+    }, {});
+    ```
+  </Tab>
+</Tabs>
+
+## JSON Serialization
+
+The Contact entity uses Jackson annotations:
+
+```java
+@JsonProperty
+private String method;
+
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@ManyToOne(fetch = FetchType.LAZY, optional = false)
+private Account account;
+```
+
+<Note type="info">
+  `@JsonIgnoreProperties` prevents serialization issues with lazy-loaded relationships, ensuring clean JSON responses.
+</Note>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Consistent Logging" icon="check">
+    Create a contact record for every significant interaction with an account
+  </Card>
+  
+  <Card title="Method Standardization" icon="list">
+    Use consistent naming for communication methods across your organization
+  </Card>
+  
+  <Card title="Date Accuracy" icon="clock">
+    Always log the actual date of interaction, not the record creation date
+  </Card>
+  
+  <Card title="Link Properly" icon="link">
+    Ensure contacts are linked to both the correct account and opportunity
+  </Card>
+</CardGroup>
+
+## Reporting Opportunities
+
+Contacts enable powerful analytics:
+
+1. **Activity Reports**: Track team productivity by counting contacts per user
+2. **Account Health**: Identify at-risk accounts with low contact frequency
+3. **Method Analysis**: Understand which communication methods are most effective
+4. **Timeline View**: Display complete interaction history for any account or opportunity
+
+## Date Handling
+
+<Note type="warning">
+  The `date` field uses `java.sql.Date`, which only stores the date portion (no time). Format dates as `YYYY-MM-DD` when sending from the frontend.
+</Note>
+
+```javascript
+// Correct date formatting
+const today = new Date().toISOString().split('T')[0]; // "2026-03-13"
+
+// Incorrect - includes time
+const wrong = new Date().toISOString(); // "2026-03-13T10:30:00.000Z"
+```
+
+## Related Resources
+
+- [Accounts](/features/accounts) - Learn about account management
+- [Opportunities](/features/opportunities) - Understand opportunity tracking
+- [Users & Authentication](/features/users-authentication) - User relationship management

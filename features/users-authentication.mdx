@@ -1,0 +1,402 @@
+---
+title: "Users & Authentication"
+description: "User management system with registration and authentication capabilities"
+icon: "user-lock"
+---
+
+## Overview
+
+The User Authentication system manages user accounts, registration, and login functionality in the CRM. It provides secure authentication mechanisms and user profile management with comprehensive validation.
+
+## Data Model
+
+The `User` entity represents registered users in the system with the following structure:
+
+### User Entity
+
+```java
+@Entity
+@Table(name = "Users")
+public class User {
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer userId;
+    
+    private String name;
+    private Integer phone;
+    
+    @Email(message="Please provide a valid email address") 
+    @Pattern(regexp=".+@.+\\..+", message="Please provide a valid email address")
+    @Column(unique=true)
+    private String email;
+    
+    private String address;
+    
+    @Size(min = 4, max = 15)
+    private String password;
+    
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Opportunity> opportunities;
+}
+```
+
+### Field Specifications
+
+<CardGroup cols={2}>
+  <Card title="userId" icon="hashtag">
+    **Type:** Integer (Auto-generated)
+    
+    Primary key, automatically generated using identity strategy
+  </Card>
+  
+  <Card title="name" icon="signature">
+    **Type:** String
+    
+    User's full name
+  </Card>
+  
+  <Card title="email" icon="envelope">
+    **Type:** String (Unique)
+    
+    **Validations:**
+    - Must be valid email format
+    - Pattern: `.+@.+\..+`
+    - Must be unique across all users
+  </Card>
+  
+  <Card title="password" icon="key">
+    **Type:** String
+    
+    **Validations:**
+    - Minimum length: 4 characters
+    - Maximum length: 15 characters
+  </Card>
+  
+  <Card title="phone" icon="phone">
+    **Type:** Integer
+    
+    User's contact phone number
+  </Card>
+  
+  <Card title="address" icon="location-dot">
+    **Type:** String
+    
+    User's physical address
+  </Card>
+</CardGroup>
+
+### Relationships
+
+<Note>
+  **One-to-Many with Opportunities**
+  
+  A user can have multiple opportunities associated with them. This relationship uses lazy loading and cascades all operations.
+</Note>
+
+## API Endpoints
+
+### Register User
+
+Create a new user account in the system.
+
+```java
+@PostMapping("/createUser")
+public ResponseEntity<User> registerUser(@Valid @RequestBody User user)
+```
+
+<Accordion title="Request Details">
+  **Endpoint:** `POST /api/user/createUser`
+  
+  **Request Body:**
+  ```json
+  {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "secure123",
+    "phone": 1234567890,
+    "address": "123 Main Street"
+  }
+  ```
+  
+  **Response:** Returns the created user object with generated `userId`
+  
+  **Status Codes:**
+  - `201 CREATED` - User successfully registered
+  - `404 NOT FOUND` - Registration failed
+</Accordion>
+
+### Login User
+
+Authenticate a user with email and password.
+
+```java
+@PostMapping("/searchUser")
+public ResponseEntity<User> loginUser(@RequestBody User user)
+```
+
+<Accordion title="Request Details">
+  **Endpoint:** `POST /api/user/searchUser`
+  
+  **Request Body:**
+  ```json
+  {
+    "email": "john.doe@example.com",
+    "password": "secure123"
+  }
+  ```
+  
+  **Response:** Returns the authenticated user object if credentials match
+  
+  **Status Codes:**
+  - `200 OK` - Login successful
+  - `404 NOT FOUND` - Invalid credentials or user not found
+</Accordion>
+
+### Get All Users
+
+Retrieve a list of all registered users.
+
+```java
+@GetMapping("/getUsers")
+public ResponseEntity<List<User>> returnsUsers()
+```
+
+<Accordion title="Request Details">
+  **Endpoint:** `GET /api/user/getUsers`
+  
+  **Response:** Returns array of all user objects
+  
+  **Status Codes:**
+  - `200 OK` - Users retrieved successfully
+  - `404 NOT FOUND` - No users found
+</Accordion>
+
+## Frontend Implementation
+
+### Registration Component
+
+The React registration form includes real-time validation:
+
+```jsx
+import { useState } from "react";
+import validator from "validator";
+
+function RegisterCard({ sendRegisterData }) {
+  const [enteredEmail, setEmail] = useState("");
+  const [enteredPassword, setPassword] = useState("");
+  const [enteredName, setName] = useState("");
+  const [enteredPhone, setPhone] = useState("");
+  const [enteredAddress, setAddress] = useState("");
+  const [message, setMessage] = useState("");
+
+  // Email validation
+  function validateEmail(e) {
+    var email = e.target.value;
+    if (validator.isEmail(email)) {
+      setEmail(email);
+      setMessage("");
+    } else {
+      setMessage("Please, enter valid Email!");
+    }
+  }
+
+  // Phone validation - only numbers
+  function phoneChangeHandler(event) {
+    const result = event.target.value.replace(/\D/g, '');
+    if (result !== '') {
+      setPhone(Number(result));
+    }
+  }
+
+  // Name validation - only letters and spaces
+  function nameChangeHandler(event) {
+    const result = event.target.value.replace(/[^a-z ]/gi, '');
+    setName(result);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    const DatosRegistro = {
+      Email: enteredEmail,
+      Password: enteredPassword,
+      Name: enteredName,
+      Phone: enteredPhone,
+      Address: enteredAddress
+    };
+    sendRegisterData(DatosRegistro);
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+    </form>
+  );
+}
+```
+
+<Tabs>
+  <Tab title="Registration API Call">
+    ```javascript
+    function handleRegister(data) {
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.Email,
+          password: data.Password,
+          address: data.Address,
+          phone: data.Phone,
+          name: data.Name,
+        }),
+      };
+
+      fetch("http://localhost:8080/api/user/createUser", requestOptions)
+        .then((response) => {
+          if (response.ok) {
+            navigate("/MainMenu");
+          }
+        })
+        .catch((error) => {
+          console.error("Error en registro:", error);
+        });
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Login API Call">
+    ```javascript
+    function handleLogin(data) {
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.Email,
+          password: data.Password,
+        }),
+      };
+
+      fetch("http://localhost:8080/api/user/searchUser", requestOptions)
+        .then((response) => {
+          if (response.ok) {
+            navigate("/MainMenu");
+          }
+        })
+        .catch((error) => {
+          console.error("Error en login:", error);
+        });
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Login Component
+
+Simplified login form for authentication:
+
+```jsx
+function LoginCard({ sendLoginData }) {
+  const [enteredEmail, setEmail] = useState("");
+  const [enteredPassword, setPassword] = useState("");
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    const DatosLogin = {
+      Email: enteredEmail,
+      Password: enteredPassword
+    };
+    sendLoginData(DatosLogin);
+    setEmail("");
+    setPassword("");
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        name="email"
+        value={enteredEmail}
+        required
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        name="password"
+        value={enteredPassword}
+        required
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <input type="submit" />
+    </form>
+  );
+}
+```
+
+## Validation Rules
+
+<Note type="warning">
+  **Backend Validations**
+  
+  The system enforces the following constraints:
+  - Email must be unique and valid format
+  - Password must be 4-15 characters
+  - All fields are required except opportunities list
+</Note>
+
+<Note type="info">
+  **Frontend Validations**
+  
+  Client-side validation provides immediate feedback:
+  - Email format validation using validator library
+  - Phone accepts only numeric input
+  - Name accepts only letters and spaces
+  - Real-time error messages
+</Note>
+
+## Service Layer
+
+The `UserService` handles business logic:
+
+```java
+@Service
+public class UserService {
+    @Autowired
+    UserRepo userRepository;
+
+    // Save new user
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    // Authenticate user by email and password
+    public List<User> loginUser(User user) {
+        return userRepository.findByEmailPassword(
+            user.getEmail(), 
+            user.getPassword()
+        );
+    }
+
+    // Retrieve all users
+    public List<User> retrieveUsers() {
+        return userRepository.findAll();
+    }
+}
+```
+
+## Security Considerations
+
+<Note type="warning">
+  **Important:** The current implementation stores passwords in plain text. For production use, implement proper password hashing using BCrypt or similar algorithms.
+</Note>
+
+## Best Practices
+
+1. **Email Uniqueness**: The system enforces unique email addresses at the database level
+2. **Validation**: Both frontend and backend validation ensure data integrity
+3. **Error Handling**: Proper HTTP status codes indicate success or failure
+4. **Relationship Management**: Cascade operations automatically manage related opportunities
+
+## Next Steps
+
+- Explore [Opportunities](/features/opportunities) to understand user-opportunity relationships
+- Learn about [Accounts](/features/accounts) to manage customer data
+- Review [Contacts](/features/contacts) for communication tracking

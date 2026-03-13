@@ -1,0 +1,716 @@
+---
+title: 'Installation'
+description: 'Complete installation and configuration guide for the CRM API'
+---
+
+## Overview
+
+This guide provides detailed instructions for setting up the CRM application on your local development environment. The application consists of two independent modules that work together:
+
+- **Backend**: Spring Boot 3.0 REST API (Java 17)
+- **Frontend**: React 18.2 Single Page Application
+
+<Note>
+  This installation guide covers development setup. For production deployment, see the [Deployment Guide](/deployment/backend).
+</Note>
+
+## System Requirements
+
+### Backend Requirements
+
+<CardGroup cols={2}>
+
+<Card title="Java Development Kit" icon="java">
+  **Java 17 JDK** or higher
+  
+  Download from [Oracle](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) or [OpenJDK](https://openjdk.org/projects/jdk/17/)
+</Card>
+
+<Card title="Build Tool" icon="hammer">
+  **Maven** (optional)
+  
+  Maven wrapper (`mvnw`) is included in the project
+</Card>
+
+</CardGroup>
+
+### Frontend Requirements
+
+<CardGroup cols={2}>
+
+<Card title="Node.js" icon="node-js">
+  **Node.js v14+** (v18 recommended)
+  
+  Download from [nodejs.org](https://nodejs.org/)
+</Card>
+
+<Card title="Package Manager" icon="box">
+  **npm** (included with Node.js)
+  
+  Or use yarn/pnpm as alternatives
+</Card>
+
+</CardGroup>
+
+### Verify Prerequisites
+
+Before proceeding, verify that you have the required tools installed:
+
+```bash
+# Check Java version (should be 17 or higher)
+java -version
+
+# Check Node.js version
+node --version
+
+# Check npm version
+npm --version
+```
+
+## Installation Steps
+
+<Steps>
+
+### Download the Project
+
+Clone the repository or download the source code:
+
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
+
+The project structure should look like this:
+
+```
+project-root/
+├── Backend Springboot/
+│   └── CRM/
+│       ├── src/
+│       ├── pom.xml
+│       ├── mvnw
+│       └── mvnw.cmd
+├── frontend-react/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+└── README.md
+```
+
+### Configure the Backend
+
+Navigate to the backend directory:
+
+```bash
+cd "Backend Springboot/CRM"
+```
+
+#### Review Application Properties
+
+The backend is pre-configured with sensible defaults in `src/main/resources/application.properties`:
+
+```properties
+# H2 Database Configuration
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.jpa.defer-datasource-initialization=true
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.datasource.initialize=true
+
+# Management Endpoints
+management.endpoints.web.exposure.include=*
+```
+
+<Tip>
+  The default configuration uses an in-memory H2 database, which is perfect for development. No additional database setup is required.
+</Tip>
+
+#### Database Configuration Details
+
+The application uses **H2 Database** with the following characteristics:
+
+- **Type**: In-memory database
+- **URL**: `jdbc:h2:mem:testdb`
+- **Schema**: Auto-created on startup with `create-drop` strategy
+- **Data Persistence**: Data is lost when the application stops
+
+**H2 Console Access** (optional):
+
+The H2 console is available at `http://localhost:8080/h2-console` while the application is running.
+
+Connection settings:
+- **JDBC URL**: `jdbc:h2:mem:testdb`
+- **User Name**: `sa`
+- **Password**: _(leave empty)_
+
+<Warning>
+  The `create-drop` strategy recreates the database schema on each startup. This is ideal for development but should be changed to `update` or `validate` for production environments.
+</Warning>
+
+### Build and Run the Backend
+
+#### Option 1: Using Maven Wrapper (Recommended)
+
+The project includes Maven wrapper scripts, so you don't need to install Maven separately:
+
+<CodeGroup>
+
+```bash Linux/Mac
+# Make the wrapper executable (first time only)
+chmod +x mvnw
+
+# Run the application
+./mvnw spring-boot:run
+```
+
+```bash Windows
+# Run the application
+mvnw.cmd spring-boot:run
+```
+
+</CodeGroup>
+
+#### Option 2: Using Installed Maven
+
+If you have Maven installed globally:
+
+```bash
+mvn spring-boot:run
+```
+
+#### Verify Backend Startup
+
+You should see output similar to:
+
+```
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.0.0)
+
+...
+Started CrmApplication in 3.452 seconds (JVM running for 3.789)
+```
+
+The backend API is now running at:
+```
+http://localhost:8080
+```
+
+### Configure the Frontend
+
+Open a **new terminal window** (keep the backend running) and navigate to the frontend directory:
+
+```bash
+cd frontend-react
+```
+
+#### Install Dependencies
+
+Install all required npm packages:
+
+```bash
+npm install
+```
+
+This will install the following key dependencies:
+
+```json
+{
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0",
+  "react-router-dom": "^6.4.4",
+  "validator": "^13.7.0",
+  "react-scripts": "5.0.1"
+}
+```
+
+<Note>
+  The installation may take a few minutes on the first run as npm downloads all dependencies and their transitive dependencies.
+</Note>
+
+#### API Endpoint Configuration
+
+The frontend is configured to communicate with the backend at `http://localhost:8080`. This is hardcoded in the route components:
+
+```javascript
+// Example from src/Routes/Home.js
+fetch("http://localhost:8080/api/user/searchUser", requestOptions)
+  .then(response => {
+    if (response.ok) {
+      navigate("/MainMenu");
+    }
+  })
+```
+
+<Tip>
+  If you need to change the backend URL (e.g., for production), you'll need to update the fetch calls in:
+  - `src/Routes/Home.js`
+  - `src/Routes/Register.js`
+  - Any other components that make API calls
+</Tip>
+
+### Run the Frontend
+
+Start the React development server:
+
+```bash
+npm start
+```
+
+The development server will:
+- Start on `http://localhost:3000`
+- Automatically open your default browser
+- Enable hot module replacement (changes reload automatically)
+
+You should see:
+
+```
+Compiled successfully!
+
+You can now view frontend-react in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.1.x:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+```
+
+### Verify the Installation
+
+You should now see the CRM login page in your browser. Test the installation by:
+
+1. **Registering a new user**: Click on the register link and create an account
+2. **Logging in**: Use the credentials you just created
+3. **Accessing the main menu**: After login, you should see the CRM dashboard
+
+</Steps>
+
+## Architecture Overview
+
+Understanding the project structure helps with development and troubleshooting:
+
+### Backend Architecture
+
+```
+Backend Springboot/CRM/src/main/java/com/CRM/CRM/
+├── Controllers/       # REST API endpoints
+│   ├── UserController.java
+│   ├── AccountController.java
+│   ├── ContactController.java
+│   └── OpportunityController.java
+├── Services/          # Business logic layer
+│   ├── UserService.java
+│   ├── AccountService.java
+│   ├── ContactService.java
+│   └── OpportunityService.java
+├── Repositories/      # Data access layer
+│   ├── UserRepository.java
+│   ├── AccountRepository.java
+│   ├── ContactRepository.java
+│   └── OpportunityRepository.java
+├── Models/           # JPA entities
+│   ├── User.java
+│   ├── Account.java
+│   ├── Contact.java
+│   └── Opportunity.java
+└── CrmApplication.java  # Main application class
+```
+
+**Design Pattern**: The backend follows the standard **Controller-Service-Repository** pattern:
+
+- **Controllers**: Handle HTTP requests and responses
+- **Services**: Contain business logic
+- **Repositories**: Interface with the database using Spring Data JPA
+- **Models**: JPA entities mapped to database tables
+
+### Frontend Architecture
+
+```
+frontend-react/src/
+├── Routes/              # Page components
+│   ├── Home.js         # Login page
+│   ├── Register.js     # Registration page
+│   ├── MainMenu.js     # Dashboard
+│   └── root.js         # Root router
+├── Components/          # Reusable UI components
+│   ├── LoginCard.js
+│   ├── RegisterCard.js
+│   ├── MainMenuCard.js
+│   └── Styles/         # Component styles
+├── index.js            # Application entry point
+└── index.css           # Global styles
+```
+
+**Routing**: The application uses **React Router v6** for client-side routing.
+
+## Technology Stack Details
+
+### Backend Technologies
+
+<CardGroup cols={2}>
+
+<Card title="Spring Boot 3.0" icon="leaf">
+  Core framework for building the REST API
+  
+  - Auto-configuration
+  - Embedded Tomcat server
+  - Production-ready features
+</Card>
+
+<Card title="Spring Data JPA" icon="database">
+  Data persistence and ORM
+  
+  - Hibernate implementation
+  - Repository pattern
+  - Query derivation
+</Card>
+
+<Card title="Hibernate Validator" icon="check">
+  Bean validation framework
+  
+  - `@Email`, `@Size` constraints
+  - Custom validation rules
+  - Input sanitization
+</Card>
+
+<Card title="H2 Database" icon="server">
+  In-memory SQL database
+  
+  - Zero configuration
+  - Web console included
+  - Perfect for development
+</Card>
+
+</CardGroup>
+
+### Frontend Technologies
+
+<CardGroup cols={2}>
+
+<Card title="React 18.2" icon="react">
+  UI library for building components
+  
+  - Functional components
+  - Hooks (useState, useNavigate)
+  - Virtual DOM
+</Card>
+
+<Card title="React Router DOM 6" icon="route">
+  Client-side routing
+  
+  - Declarative routing
+  - Nested routes
+  - Navigation guards
+</Card>
+
+<Card title="Validator" icon="shield">
+  Input validation library
+  
+  - Email validation
+  - String validation
+  - Sanitization
+</Card>
+
+<Card title="Jest & Testing Library" icon="vial">
+  Testing framework
+  
+  - Unit tests
+  - Component tests
+  - Integration tests
+</Card>
+
+</CardGroup>
+
+## Environment Configuration
+
+### Backend Environment Variables
+
+You can customize the backend configuration using environment variables:
+
+```bash
+# Change server port
+export SERVER_PORT=8081
+
+# Enable SQL logging
+export SPRING_JPA_SHOW_SQL=true
+
+# Set log level
+export LOGGING_LEVEL_ORG_SPRINGFRAMEWORK=DEBUG
+```
+
+Then start the application:
+
+```bash
+./mvnw spring-boot:run
+```
+
+### Frontend Environment Variables
+
+Create a `.env` file in the `frontend-react` directory:
+
+```bash
+# API endpoint
+REACT_APP_API_URL=http://localhost:8080
+
+# Custom port
+PORT=3001
+```
+
+<Warning>
+  Environment variables in Create React App must start with `REACT_APP_` to be accessible in your code.
+</Warning>
+
+## Advanced Configuration
+
+### Using a Persistent Database
+
+To switch from H2 in-memory to a persistent database, update `application.properties`:
+
+#### H2 File-Based
+
+```properties
+spring.datasource.url=jdbc:h2:file:./data/crm
+spring.jpa.hibernate.ddl-auto=update
+```
+
+#### PostgreSQL
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/crm
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+```
+
+Add PostgreSQL dependency to `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+#### MySQL
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/crm
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+```
+
+Add MySQL dependency to `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+### CORS Configuration
+
+The backend uses `@CrossOrigin()` annotations on controllers to allow cross-origin requests. This is configured per controller:
+
+```java
+@CrossOrigin()
+@PostMapping("/createUser")
+public ResponseEntity<User> registerUser(@Valid @RequestBody User user) {
+    // ...
+}
+```
+
+For production, configure specific origins in a dedicated configuration class.
+
+## Troubleshooting
+
+<AccordionGroup>
+
+<Accordion title="Java version error: 'java.lang.UnsupportedClassVersionError'">
+  This error occurs when trying to run Java 17 code with an older JDK.
+  
+  **Solution:**
+  1. Verify your Java version: `java -version`
+  2. Ensure it shows version 17 or higher
+  3. If you have multiple Java versions, set `JAVA_HOME`:
+     ```bash
+     export JAVA_HOME=/path/to/jdk-17
+     ```
+</Accordion>
+
+<Accordion title="Port 8080 already in use">
+  Another application is using the default Spring Boot port.
+  
+  **Solution:**
+  Add this to `application.properties`:
+  ```properties
+  server.port=8081
+  ```
+  
+  **Important:** Update frontend API calls to use the new port.
+</Accordion>
+
+<Accordion title="Frontend: 'npm install' fails with permission errors">
+  NPM permission issues, especially on Linux/Mac.
+  
+  **Solution:**
+  Don't use sudo. Instead, configure npm to use a different directory:
+  ```bash
+  mkdir ~/.npm-global
+  npm config set prefix '~/.npm-global'
+  echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+  source ~/.bashrc
+  ```
+</Accordion>
+
+<Accordion title="CORS errors in browser console">
+  The browser is blocking requests from the frontend to the backend.
+  
+  **Common causes:**
+  - Backend is not running
+  - Backend URL is incorrect in frontend code
+  - `@CrossOrigin()` annotation is missing from controllers
+  
+  **Solution:**
+  1. Verify backend is running on port 8080
+  2. Check browser console for the exact error
+  3. Ensure all controllers have `@CrossOrigin()` annotations
+</Accordion>
+
+<Accordion title="Maven build fails: 'Could not resolve dependencies'">
+  Maven cannot download dependencies, often due to network issues.
+  
+  **Solution:**
+  1. Check your internet connection
+  2. Try deleting the Maven cache:
+     ```bash
+     rm -rf ~/.m2/repository
+     ```
+  3. Run the build again:
+     ```bash
+     ./mvnw clean install
+     ```
+</Accordion>
+
+<Accordion title="H2 Console shows 'Database not found'">
+  The H2 console cannot connect to the in-memory database.
+  
+  **Solution:**
+  Ensure you're using the exact JDBC URL:
+  ```
+  jdbc:h2:mem:testdb
+  ```
+  
+  The database only exists while the Spring Boot application is running.
+</Accordion>
+
+<Accordion title="Frontend can't reach backend API">
+  Network connectivity issues between frontend and backend.
+  
+  **Checklist:**
+  - [ ] Backend is running (check terminal for "Started CrmApplication")
+  - [ ] Backend is on port 8080 (or update frontend URLs)
+  - [ ] No firewall blocking localhost connections
+  - [ ] Test backend directly: `curl http://localhost:8080/api/user/getUsers`
+</Accordion>
+
+<Accordion title="React app shows blank page">
+  JavaScript errors preventing the app from rendering.
+  
+  **Solution:**
+  1. Open browser DevTools (F12)
+  2. Check the Console tab for errors
+  3. Common issues:
+     - Missing `node_modules`: run `npm install`
+     - Syntax errors: check the error message
+     - API connection failures: verify backend is running
+</Accordion>
+
+</AccordionGroup>
+
+## Running Tests
+
+### Backend Tests
+
+The backend uses **TestNG** for unit testing:
+
+```bash
+cd "Backend Springboot/CRM"
+./mvnw test
+```
+
+### Frontend Tests
+
+The frontend uses **Jest** and **React Testing Library**:
+
+```bash
+cd frontend-react
+npm test
+```
+
+Run tests in CI mode (non-interactive):
+
+```bash
+npm test -- --watchAll=false
+```
+
+## Building for Production
+
+### Backend Production Build
+
+Create an executable JAR file:
+
+```bash
+cd "Backend Springboot/CRM"
+./mvnw clean package
+```
+
+The JAR file will be created in `target/CRM-0.0.1-SNAPSHOT.jar`.
+
+Run the production JAR:
+
+```bash
+java -jar target/CRM-0.0.1-SNAPSHOT.jar
+```
+
+### Frontend Production Build
+
+Create an optimized production build:
+
+```bash
+cd frontend-react
+npm run build
+```
+
+The production files will be created in the `build/` directory, ready for deployment to any static hosting service.
+
+## Next Steps
+
+<CardGroup cols={2}>
+
+<Card title="API Reference" icon="book" href="/api/overview">
+  Explore all available API endpoints
+</Card>
+
+<Card title="Authentication Guide" icon="key" href="/features/users-authentication">
+  Learn how to implement user authentication
+</Card>
+
+<Card title="Configuration Guide" icon="database" href="/deployment/configuration">
+  Configure and manage your application
+</Card>
+
+<Card title="Deployment" icon="rocket" href="/deployment/backend">
+  Deploy your application to production
+</Card>
+
+</CardGroup>

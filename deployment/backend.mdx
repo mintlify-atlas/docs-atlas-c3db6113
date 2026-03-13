@@ -1,0 +1,231 @@
+---
+title: 'Backend Deployment'
+description: 'Deploy and run the CRM Spring Boot backend application'
+---
+
+The CRM backend is built with Spring Boot 3.0.0 and Java 17, using Maven as the build tool and H2 as the in-memory database.
+
+## Prerequisites
+
+Before deploying the backend, ensure you have:
+
+- **Java 17** or higher installed
+- **Maven** (or use the included Maven wrapper)
+- Port **8080** available (default Spring Boot port)
+
+## Quick Start
+
+The project includes a Maven wrapper, so you don't need Maven installed separately.
+
+<Steps>
+  <Step title="Navigate to the backend directory">
+    ```bash
+    cd "Backend Springboot/CRM"
+    ```
+  </Step>
+
+  <Step title="Run the application using Maven wrapper">
+    <CodeGroup>
+      ```bash Linux/Mac
+      ./mvnw spring-boot:run
+      ```
+
+      ```bash Windows
+      mvnw.cmd spring-boot:run
+      ```
+    </CodeGroup>
+
+    The application will start on `http://localhost:8080`
+  </Step>
+
+  <Step title="Verify the application is running">
+    The console should display:
+    ```
+    Started CrmApplication in X.XXX seconds
+    ```
+
+    Test the API endpoint:
+    ```bash
+    curl http://localhost:8080/api/user/getUsers
+    ```
+  </Step>
+</Steps>
+
+## Build Commands
+
+### Development Mode
+
+Run the application with Spring Boot DevTools enabled for hot reloading:
+
+```bash
+./mvnw spring-boot:run
+```
+
+### Build JAR Package
+
+Create a production-ready JAR file:
+
+```bash
+./mvnw clean package
+```
+
+The JAR will be created in `target/CRM-0.0.1-SNAPSHOT.jar`
+
+### Run the JAR
+
+```bash
+java -jar target/CRM-0.0.1-SNAPSHOT.jar
+```
+
+### Run Tests
+
+```bash
+./mvnw test
+```
+
+## Database Configuration
+
+The application uses **H2 in-memory database** by default. The database is initialized on startup and destroyed on shutdown.
+
+<Note>
+  The H2 database is configured to run in memory, which means all data will be lost when the application stops. This is ideal for development and testing.
+</Note>
+
+### Database Properties
+
+From `application.properties`:
+
+```properties
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.jpa.defer-datasource-initialization=true
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.datasource.initialize=true
+```
+
+### H2 Console Access
+
+Access the H2 database console at:
+```
+http://localhost:8080/h2-console
+```
+
+**Connection settings:**
+- JDBC URL: `jdbc:h2:mem:testdb`
+- Username: `sa`
+- Password: (leave empty)
+
+## Port Configuration
+
+### Default Port
+
+The application runs on port **8080** by default.
+
+### Custom Port
+
+To run on a different port, add to `application.properties`:
+
+```properties
+server.port=8081
+```
+
+Or pass as a command-line argument:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+```
+
+Or when running the JAR:
+
+```bash
+java -jar target/CRM-0.0.1-SNAPSHOT.jar --server.port=8081
+```
+
+## Environment Setup
+
+### Java Version Verification
+
+Verify Java 17 is installed:
+
+```bash
+java -version
+```
+
+Expected output:
+```
+java version "17.x.x"
+```
+
+### Maven Wrapper Permissions
+
+If you encounter permission issues on Linux/Mac:
+
+```bash
+chmod +x mvnw
+```
+
+## Project Dependencies
+
+Key dependencies from `pom.xml`:
+
+<Accordion title="View all dependencies">
+  - **Spring Boot Starter Web** (3.0.0) - REST API framework
+  - **Spring Boot Starter Data JPA** - Database ORM
+  - **H2 Database** - In-memory database
+  - **Spring Boot DevTools** - Development hot reload
+  - **Hibernate Validator** - Request validation
+  - **Spring Boot Starter Validation** - JSR-303 validation
+  - **TestNG** (7.6.1) - Testing framework
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Port 8080 already in use">
+  If port 8080 is already in use:
+  
+  1. Find the process using the port:
+     ```bash
+     # Linux/Mac
+     lsof -i :8080
+     
+     # Windows
+     netstat -ano | findstr :8080
+     ```
+  
+  2. Kill the process or change the port as described above
+</Accordion>
+
+<Accordion title="Java version mismatch">
+  The project requires Java 17. If you have multiple Java versions:
+  
+  ```bash
+  # Set JAVA_HOME to Java 17 installation
+  export JAVA_HOME=/path/to/java17
+  ```
+</Accordion>
+
+<Accordion title="Maven wrapper not executing">
+  On Linux/Mac, ensure the wrapper has execute permissions:
+  
+  ```bash
+  chmod +x mvnw
+  ./mvnw spring-boot:run
+  ```
+</Accordion>
+
+<Warning>
+  The H2 database is in-memory only. All data will be lost when the application stops. For production deployments, configure a persistent database like PostgreSQL or MySQL.
+</Warning>
+
+## API Base URL
+
+Once running, all API endpoints are available at:
+
+```
+http://localhost:8080/api/
+```
+
+Available endpoint prefixes:
+- `/api/user` - User management
+- `/api/contact` - Contact management
+- `/api/account` - Account management
+- `/api/opportunity` - Opportunity management
