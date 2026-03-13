@@ -1,0 +1,85 @@
+{
+  "projectType": "saas",
+  "projectName": "CRM API",
+  "projectDescription": "A full-stack CRM application built with Spring Boot and React.js to manage users, accounts, contacts, and sales opportunities.",
+  "theme": "almond",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/users-authentication",
+              "features/accounts",
+              "features/contacts",
+              "features/opportunities"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/backend",
+              "deployment/frontend",
+              "deployment/configuration"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/overview"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/users",
+              "api/accounts",
+              "api/contacts",
+              "api/opportunities"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "User Authentication (Login & Registration)",
+    "Account Management",
+    "Contact Management",
+    "Sales Opportunity Tracking",
+    "RESTful API Backend",
+    "React-based Frontend"
+  ],
+  "publicApiSurface": [
+    "POST /api/user/createUser",
+    "POST /api/user/searchUser",
+    "GET /api/user/getUsers",
+    "POST /api/account/createAccount",
+    "GET /api/account/getAccounts",
+    "POST /api/contact/createContact",
+    "GET /api/contact/getContacts",
+    "PUT /api/contact/updateContact",
+    "POST /api/opportunity/createOpportunity",
+    "GET /api/opportunity/getOpportunities",
+    "PUT /api/opportunity/updateOpportunity",
+    "DELETE /api/opportunity/deleteOpportunity"
+  ]
+}
